@@ -1,0 +1,487 @@
+<title>音声記号30音ドリル</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Gentium+Plus:wght@400;700&family=Shippori+Mincho:wght@500;700&display=swap">
+<style>
+/* Layout: 1-column phone-first drill. Prompt card, then three answer groups (consonant: 声/調音点/調音法, vowel: 舌の前後/高さ/唇), feedback below. Tabs: ドリル / 要点 / 一覧表 / 記録. */
+:root{
+  --bg:#EDF3F5; --surface:#FFFFFF; --surface-2:#E2ECEF; --fg:#13232C; --muted:#4D6571; --line:#C4D3D9;
+  --accent:#0B6B80; --accent-fg:#FFFFFF; --accent-soft:#D3EBF0;
+  --ok:#17703F; --ok-soft:#DCF1E4; --ng:#B3261E; --ng-soft:#FBE2DF;
+  --f-ui:"BIZ UDPGothic","Hiragino Sans","Noto Sans JP","Yu Gothic",sans-serif;
+  --f-ipa:"Gentium Plus","Charis SIL","Doulos SIL","Noto Serif","DejaVu Serif","Segoe UI",serif;
+  --f-kana:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP",serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0E181E; --surface:#16252D; --surface-2:#1D3039; --fg:#E4EEF2; --muted:#9DB4BE; --line:#2B424C;
+    --accent:#5CC3D8; --accent-fg:#06222A; --accent-soft:#17414B;
+    --ok:#6FD39A; --ok-soft:#173B28; --ng:#FF9C93; --ng-soft:#47201C; color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0E181E; --surface:#16252D; --surface-2:#1D3039; --fg:#E4EEF2; --muted:#9DB4BE; --line:#2B424C;
+  --accent:#5CC3D8; --accent-fg:#06222A; --accent-soft:#17414B;
+  --ok:#6FD39A; --ok-soft:#173B28; --ng:#FF9C93; --ng-soft:#47201C; color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.65 var(--f-ui);
+  padding-block:14px 40px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));}
+.wrap{max-width:680px;margin:0 auto;display:flex;flex-direction:column;gap:14px}
+button{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+header h1{margin:0;font:700 24px/1.3 var(--f-kana);letter-spacing:.02em;text-wrap:balance}
+header p{margin:2px 0 0;color:var(--muted);font-size:13px}
+.ipa{font-family:var(--f-ipa)}
+
+.tabs{display:flex;gap:4px;background:var(--surface-2);padding:4px;border-radius:12px}
+.tabs button{flex:1;min-width:0;min-height:42px;border:0;background:transparent;border-radius:9px;font-weight:700;color:var(--muted);cursor:pointer;font-size:14px}
+.tabs button[aria-selected="true"]{background:var(--surface);color:var(--accent);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+
+.ctrl{display:flex;flex-wrap:wrap;gap:8px 18px}
+.seg{display:flex;align-items:center;gap:8px;min-width:0}
+.seg>span{font-size:12px;color:var(--muted);white-space:nowrap}
+.seg div{display:flex;gap:4px;flex-wrap:wrap}
+.chip{min-height:36px;padding:0 12px;border:1.5px solid var(--line);background:var(--surface);border-radius:999px;font-size:13px;cursor:pointer}
+.chip[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);color:var(--accent);font-weight:700}
+
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px}
+.prompt{text-align:center;padding-block:14px 18px}
+.progress{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.kana{font:700 88px/1.15 var(--f-kana);margin-top:4px}
+.ctx{display:inline-block;margin-top:2px;padding:2px 12px;border-radius:999px;background:var(--surface-2);font-size:13px;font-weight:700}
+.ipa.big{font-size:46px;line-height:1.3;color:var(--accent);margin-top:4px}
+.ask{margin-top:6px;color:var(--muted);font-size:13px}
+
+.grp{display:flex;flex-direction:column;gap:6px}
+.grp h3{margin:0;font-size:13px;color:var(--muted);font-weight:700;display:flex;justify-content:space-between;gap:8px}
+.grp h3 small{font-weight:400}
+.opts{display:grid;gap:6px}
+.opts.c2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.opts.c3{grid-template-columns:repeat(3,minmax(0,1fr))}
+.opts.c4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.opt{min-height:46px;padding:4px 2px;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;font-weight:700;cursor:pointer;line-height:1.25;position:relative;overflow-wrap:anywhere}
+.opt.ipa{font-size:24px;font-weight:400}
+.opt[aria-pressed="true"]{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent)}
+.opt.correct{border-color:var(--ok);background:var(--ok-soft);box-shadow:inset 0 0 0 1px var(--ok)}
+.opt.wrong{border-color:var(--ng);background:var(--ng-soft);box-shadow:inset 0 0 0 1px var(--ng)}
+.opt.correct::after,.opt.wrong::after{position:absolute;top:1px;right:5px;font:700 12px/1.4 var(--f-ui)}
+.opt.correct::after{content:"正解";color:var(--ok)}
+.opt.wrong::after{content:"×";color:var(--ng)}
+.opt.locked{cursor:default}
+
+.primary{width:100%;min-height:50px;border:0;border-radius:12px;background:var(--accent);color:var(--accent-fg);font-weight:700;font-size:16px;cursor:pointer}
+.primary:disabled{background:var(--surface-2);color:var(--muted);cursor:not-allowed}
+.ghost{min-height:44px;padding:0 16px;border:1.5px solid var(--accent);background:transparent;color:var(--accent);border-radius:12px;font-weight:700;cursor:pointer}
+
+.fb{display:flex;flex-direction:column;gap:12px}
+.verdict{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.verdict b{font-size:20px}
+.verdict.ok b{color:var(--ok)}.verdict.ng b{color:var(--ng)}
+.fullname{font:700 19px/1.4 var(--f-kana)}
+.fb table{width:100%;border-collapse:collapse;font-size:14px}
+.fb th,.fb td{padding:6px 4px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.fb th{color:var(--muted);font-weight:400;white-space:nowrap;width:5.5em}
+.mk{font-weight:700;white-space:nowrap}.mk.ok{color:var(--ok)}.mk.ng{color:var(--ng)}
+.condbox{background:var(--surface-2);border-radius:10px;padding:12px 14px}
+.condbox h4{margin:0 0 4px;font-size:13px;letter-spacing:.06em;color:var(--accent)}
+.condbox ul{margin:0;padding-left:1.2em}.condbox li{margin:2px 0}
+.ex{margin:8px 0 0;font-size:13px;color:var(--muted)}
+.note{font-size:13px;color:var(--muted);margin:0}
+
+.done h2{margin:0 0 4px;font:700 22px/1.3 var(--f-kana)}
+.big-score{font-size:40px;font-weight:700;color:var(--accent);font-variant-numeric:tabular-nums}
+.miss{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}
+.miss button{min-height:44px;padding:0 12px;border:1.5px solid var(--ng);background:var(--ng-soft);border-radius:10px;cursor:pointer;display:flex;align-items:center;gap:8px}
+.row{display:flex;gap:8px;flex-wrap:wrap}.row>*{flex:1 1 160px}
+
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table.chart{border-collapse:collapse;min-width:560px;width:100%;font-size:12px}
+table.chart.vchart{min-width:380px}
+.chart th,.chart td{border:1px solid var(--line);padding:2px;text-align:center}
+.chart thead th{background:var(--surface-2);padding:6px 2px;font-weight:700}
+.chart tbody th{background:var(--surface-2);padding:4px 6px;white-space:nowrap}
+.cell{display:grid;grid-template-columns:1fr 1fr;min-height:42px}
+.cell.one{grid-template-columns:1fr}
+.sym{min-width:34px;min-height:40px;border:0;background:transparent;font:400 21px/1 var(--f-ipa);cursor:pointer;border-radius:8px;padding:0 2px}
+.sym.vd{color:var(--accent);font-weight:700}
+button.sym:hover{background:var(--accent-soft)}
+.sym.empty{display:block}
+
+details.item{background:var(--surface);border:1px solid var(--line);border-radius:12px}
+details.item summary{list-style:none;display:grid;grid-template-columns:auto auto 1fr;gap:4px 12px;align-items:center;padding:10px 14px;cursor:pointer;min-height:48px}
+details.item summary::-webkit-details-marker{display:none}
+details.item .k{font:700 22px/1.2 var(--f-kana);min-width:2.2em}
+details.item .k small{display:block;font:400 11px/1.3 var(--f-ui);color:var(--muted)}
+details.item .i{font:400 24px/1 var(--f-ipa);color:var(--accent)}
+details.item .n{font-size:13px;color:var(--muted);text-align:right;min-width:0}
+details.item[open] summary{border-bottom:1px solid var(--line)}
+details.item .body{padding:10px 14px 14px}
+.list{display:flex;flex-direction:column;gap:6px}
+h2.sec{margin:6px 0 0;font:700 17px/1.4 var(--f-kana)}
+
+table.plain{width:100%;border-collapse:collapse;font-size:14px}
+.plain th,.plain td{padding:7px 8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.plain thead th{background:var(--surface-2);font-size:12px;color:var(--muted);font-weight:700}
+.plain tbody th{font-weight:700;white-space:nowrap}
+.pts .card{display:flex;flex-direction:column;gap:10px}
+.pts h2.sec{margin:0}
+.order{display:flex;flex-wrap:wrap;gap:6px 4px;align-items:center}
+.order span{padding:3px 10px;background:var(--accent-soft);border-radius:999px;font-weight:700;font-size:13px}
+.order i{font-style:normal;color:var(--muted)}
+
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px}
+.tile{position:relative;min-height:62px;border:1.5px solid var(--line);background:var(--surface);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:2px}
+.tile .i{font:400 24px/1.1 var(--f-ipa)}
+.tile .k{font-size:11px;color:var(--muted)}
+.tile.m{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.tile.m .k{color:var(--accent-fg)}
+.tile.w{background:var(--ng-soft);border-color:var(--ng)}
+.tile::after{position:absolute;top:1px;right:5px;font:700 12px/1.4 var(--f-ui)}
+.tile.m::after{content:"✓"}.tile.w::after{content:"!";color:var(--ng)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.sumline{display:flex;gap:18px;flex-wrap:wrap}
+.sumline b{font-size:26px;font-variant-numeric:tabular-nums}
+.sumline span{display:block;font-size:12px;color:var(--muted)}
+.danger{min-height:44px;padding:0 14px;border:1.5px solid var(--ng);background:transparent;color:var(--ng);border-radius:12px;font-weight:700;cursor:pointer}
+@media (max-width:380px){.kana{font-size:76px}.tabs button{font-size:13px}}
+</style>
+
+<div class="wrap">
+  <header>
+    <h1>音声記号30音ドリル</h1>
+    <p>子音25種＋母音5種を、声・調音点・調音法(母音は舌と唇)で覚える</p>
+  </header>
+
+  <div class="tabs" role="tablist" aria-label="画面の切り替え">
+    <button type="button" role="tab" id="t-drill" data-tab="drill" aria-selected="true">ドリル</button>
+    <button type="button" role="tab" id="t-points" data-tab="points" aria-selected="false">要点</button>
+    <button type="button" role="tab" id="t-chart" data-tab="chart" aria-selected="false">一覧表</button>
+    <button type="button" role="tab" id="t-log" data-tab="log" aria-selected="false">記録</button>
+  </div>
+
+  <section id="tab-drill" role="tabpanel" aria-labelledby="t-drill">
+    <div class="wrap">
+      <div class="ctrl">
+        <div class="seg"><span>記号</span><div id="ctl-sym">
+          <button type="button" class="chip" data-sym="show">見せる</button>
+          <button type="button" class="chip" data-sym="answer">答える</button></div></div>
+        <div class="seg"><span>範囲</span><div id="ctl-scope">
+          <button type="button" class="chip" data-scope="all">全30音</button>
+          <button type="button" class="chip" data-scope="cons">子音25</button>
+          <button type="button" class="chip" data-scope="vow">母音5</button>
+          <button type="button" class="chip" data-scope="tricky">条件つき</button>
+          <button type="button" class="chip" data-scope="weak">苦手</button></div></div>
+      </div>
+      <div id="quiz" class="wrap"></div>
+    </div>
+  </section>
+
+  <section id="tab-points" role="tabpanel" aria-labelledby="t-points" hidden>
+    <div class="wrap pts">
+      <div class="card">
+        <h2 class="sec">子音は3つの観点で分類する</h2>
+        <table class="plain"><thead><tr><th>観点</th><th>確認すること</th><th>分類の例</th></tr></thead><tbody>
+          <tr><th scope="row">有声/無声</th><td>声帯が振動するか</td><td>有声:振動する / 無声:振動しない</td></tr>
+          <tr><th scope="row">調音点</th><td>どこで息の流れを妨げるか</td><td>両唇・歯茎・硬口蓋・軟口蓋など</td></tr>
+          <tr><th scope="row">調音法</th><td>どのように息の流れを妨げるか</td><td>破裂音・破擦音・鼻音など</td></tr>
+        </tbody></table>
+        <p class="note">例:サ・ス・セ・ソの子音 [s] = 無声・歯茎・摩擦音</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">有声・無声の覚え方</h2>
+        <table class="plain"><tbody>
+          <tr><th scope="row">有声</th><td>濁点組(ガ・ザ・ダ・バ)+ ナ・マ・ヤ・ラ・ワ</td></tr>
+          <tr><th scope="row">無声</th><td>カ・サ・タ・ハ・パ</td></tr>
+        </tbody></table>
+        <p class="note">パ行は無声です。母音は通常有声ですが、「すき」などでは無声化することもあります。ここでは通常の分類を覚えます。</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">調音法は「息の通し方」</h2>
+        <table class="plain"><thead><tr><th>調音法</th><th>作り方</th><th>代表的な音</th></tr></thead><tbody>
+          <tr><th scope="row">破裂音</th><td>一度せき止め、開放する</td><td>パ・バ・タ・ダ・カ・ガ</td></tr>
+          <tr><th scope="row">摩擦音</th><td>狭いすき間に息を通す</td><td>サ・シ・ハ・ヒ・フ</td></tr>
+          <tr><th scope="row">破擦音</th><td>せき止めた後、摩擦を伴って開放する</td><td>ツ・チ／ザ・ジの一部</td></tr>
+          <tr><th scope="row">鼻音</th><td>口の中を閉鎖し、鼻から息を出す</td><td>マ・ナ・ニ・ン</td></tr>
+          <tr><th scope="row">弾き音</th><td>舌先で一瞬、弾くように接触する</td><td>ラ行</td></tr>
+          <tr><th scope="row">接近音</th><td>狭めるが、強い摩擦は作らない</td><td>ヤ行・ワ</td></tr>
+        </tbody></table>
+      </div>
+      <div class="card">
+        <h2 class="sec">調音点は口の前から奥へ</h2>
+        <div class="order" aria-label="調音点の順番"><span>両唇</span><i>→</i><span>歯茎</span><i>→</i><span>歯茎硬口蓋</span><i>→</i><span>硬口蓋</span><i>→</i><span>軟口蓋</span><i>→</i><span>口蓋垂</span><i>→</i><span>声門</span></div>
+        <p class="note">重点:シ・ジ・チ・ヂは「歯茎硬口蓋」、ニは「硬口蓋」。ハ=声門、ヒ=硬口蓋、フ=両唇。サの調音点は「歯茎」です。</p>
+      </div>
+      <div class="card">
+        <h2 class="sec">母音は「舌の前後・高さ・唇」</h2>
+        <table class="plain"><thead><tr><th>記号</th><th>舌の前後</th><th>舌の高さ</th><th>唇</th></tr></thead><tbody>
+          <tr><th scope="row" class="ipa">a(ア)</th><td>中舌寄り</td><td>低い(広)</td><td>丸めない</td></tr>
+          <tr><th scope="row" class="ipa">i(イ)</th><td>前舌</td><td>高い(狭)</td><td>丸めない</td></tr>
+          <tr><th scope="row" class="ipa">ɯ(ウ)</th><td>後舌寄り</td><td>高い(狭)</td><td>丸めない</td></tr>
+          <tr><th scope="row" class="ipa">e(エ)</th><td>前舌</td><td>半高(半狭)</td><td>丸めない</td></tr>
+          <tr><th scope="row" class="ipa">o(オ)</th><td>後舌</td><td>半高(半狭)</td><td>丸める</td></tr>
+        </tbody></table>
+        <p class="note">この「要点」は、共有してもらったPDF「日本語の音声 基本分類」をもとに整理しています。</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="tab-chart" role="tabpanel" aria-labelledby="t-chart" hidden>
+    <div class="wrap">
+      <h2 class="sec">子音表(調音点は口の前から奥の順)</h2>
+      <p class="note">各マスの左が無声、右が有声(青)。記号をタップすると、下の一覧が開きます。</p>
+      <div class="scroll" id="chart"></div>
+      <h2 class="sec">母音表</h2>
+      <p class="note">青い記号は唇を丸める母音です。</p>
+      <div class="scroll" id="vchart"></div>
+      <h2 class="sec">30音の一覧と特殊な条件</h2>
+      <div class="list" id="list"></div>
+    </div>
+  </section>
+
+  <section id="tab-log" role="tabpanel" aria-labelledby="t-log" hidden>
+    <div class="wrap">
+      <div class="card"><div class="sumline" id="sum"></div></div>
+      <div class="tiles" id="tiles"></div>
+      <div class="legend"><span>✓ 定着(2回連続で正解)</span><span>! 要復習</span><span>枠のみ 未挑戦</span></div>
+      <div id="reset"></div>
+    </div>
+  </section>
+</div>
+
+<script>
+(function(){
+'use strict';
+/*DATA_START*/
+const DATA=[
+{id:'p',type:'c',ipa:'p',kana:'パ',ctx:'',v:'無声',p:'両唇',m:'破裂音',conds:['パ行(パ・ピ・プ・ペ・ポ)の子音。ピなどの口蓋化は省略した基本形で覚える。','促音「っ」の後ろでも同じ [p](例 いっぱい)。'],ex:['パン','いっぱい']},
+{id:'b',type:'c',ipa:'b',kana:'バ',ctx:'',v:'有声',p:'両唇',m:'破裂音',conds:['バ行(バ・ビ・ブ・ベ・ボ)の子音。','語中(母音の間)では、閉鎖がゆるんで [β](有声両唇摩擦音)に近づくことがある(揺れ)。'],ex:['バス','バナナ']},
+{id:'t',type:'c',ipa:'t',kana:'タ',ctx:'',v:'無声',p:'歯茎',m:'破裂音',conds:['タ行のうち、タ・テ・トの子音だけが [t]。','チは [tɕ]、ツは [ts] という別の音(破擦音)になる。','促音「っ」の後ろでも同じ [t](例 きって)。'],ex:['たまご','てがみ','きって']},
+{id:'d',type:'c',ipa:'d',kana:'ダ',ctx:'',v:'有声',p:'歯茎',m:'破裂音',conds:['ダ行のうち、ダ・デ・ドの子音だけが [d]。','ヂ・ヅはジ・ズと同じ音(四つ仮名)で、[d] ではない。','ラ行の [ɾ] との違いは閉鎖の長さ。[d] はしっかり閉じる。'],ex:['だれ','でんわ','どうぞ']},
+{id:'k',type:'c',ipa:'k',kana:'カ',ctx:'',v:'無声',p:'軟口蓋',m:'破裂音',conds:['カ行(カ・キ・ク・ケ・コ)の子音。キなどの口蓋化は省略した基本形で覚える。','促音「っ」の後ろでも同じ [k](例 がっこう)。'],ex:['かめ','くるま','がっこう']},
+{id:'g',type:'c',ipa:'g',kana:'ガ',ctx:'語頭・ンの後',v:'有声',p:'軟口蓋',m:'破裂音',conds:['ガ行(ガ・ギ・グ・ゲ・ゴ)の子音は、語頭と撥音「ん」の後で [g]。','語中・語尾では鼻濁音 [ŋ] になる(伝統的な共通語の規範。現在は [g] で通す人も多い)。'],ex:['がっこう','ごはん','まんが']},
+{id:'ts',type:'c',ipa:'ts',kana:'ツ',ctx:'',v:'無声',p:'歯茎',m:'破擦音',conds:['ツの子音。外来語のツァ・ツェ・ツォも同じ [ts]。','母音は唇を丸めない [ɯ]。'],ex:['つくえ','つき','かつ']},
+{id:'dz',type:'c',ipa:'dz',kana:'ズ',ctx:'語頭・ン/ッの後',v:'有声',p:'歯茎',m:'破擦音',conds:['ザ行(ザ・ズ・ゼ・ゾ)とヅの子音は、語頭と撥音「ん」・促音「っ」の後では破擦音 [dz](破擦音型)。','語中(母音の間)では摩擦音 [z] になる([z] の項を参照)。','ヅ(づ)はズ(ず)と同じ音(四つ仮名)。'],ex:['ずっと','ざる','まんぞく']},
+{id:'tsh',type:'c',ipa:'tɕ',kana:'チ',ctx:'',v:'無声',p:'歯茎硬口蓋',m:'破擦音',conds:['チ・チャ・チュ・チョの子音。外来語のチェも同じ。','チは「歯茎硬口蓋」。ツ(歯茎)と区別する。','[tʃ] や [ʨ] と書く教材もある。'],ex:['ちかい','ちゃわん','まっちゃ']},
+{id:'dzh',type:'c',ipa:'dʑ',kana:'ジ',ctx:'語頭・ン/ッの後',v:'有声',p:'歯茎硬口蓋',m:'破擦音',conds:['ジ・ジャ・ジュ・ジョとヂの子音は、語頭と撥音「ん」・促音「っ」の後では破擦音 [dʑ](破擦音型)。','語中(母音の間)では摩擦音 [ʑ] になる([ʑ] の項を参照)。','ヂ(ぢ)はジ(じ)と同じ音(四つ仮名)。標準語では通常同音。[dʒ]・[ʥ] と書く教材もある。'],ex:['じしょ','じゃがいも','えんじん']},
+{id:'s',type:'c',ipa:'s',kana:'サ',ctx:'',v:'無声',p:'歯茎',m:'摩擦音',conds:['サ・ス・セ・ソの子音。調音点は「歯茎」。','シ・シャ・シュ・ショは [ɕ] で別の音。','ス・ツなどの母音 [ɯ] は、無声子音にはさまれると無声化することがある。'],ex:['さかな','すし','せんせい']},
+{id:'z',type:'c',ipa:'z',kana:'ズ',ctx:'語中(母音の間)',v:'有声',p:'歯茎',m:'摩擦音',conds:['ザ・ズ・ゼ・ゾの子音は、語中(母音の間)で摩擦音 [z](摩擦音型)。','語頭・撥音「ん」・促音「っ」の後ろでは破擦音 [dz]。','実際には語頭でも [z] で発音する人が多く、揺れがある。'],ex:['かぜ','かぞく','みず']},
+{id:'sh',type:'c',ipa:'ɕ',kana:'シ',ctx:'',v:'無声',p:'歯茎硬口蓋',m:'摩擦音',conds:['シ・シャ・シュ・ショの子音。外来語のシェも同じ。','シは「歯茎硬口蓋」。サ(歯茎)と区別する。','[ʃ] と書く教材もある(舌の位置と唇の丸めが少し違う)。'],ex:['しろ','しゃしん','おしえる']},
+{id:'zh',type:'c',ipa:'ʑ',kana:'ジ',ctx:'語中(母音の間)',v:'有声',p:'歯茎硬口蓋',m:'摩擦音',conds:['ジ・ジャ・ジュ・ジョとヂの子音は、語中(母音の間)で摩擦音 [ʑ](摩擦音型)。','語頭・撥音「ん」・促音「っ」の後ろでは破擦音 [dʑ]。','[ʒ] と書く教材もある。'],ex:['まじめ','おじさん','ひじ']},
+{id:'hh',type:'c',ipa:'ç',kana:'ヒ',ctx:'',v:'無声',p:'硬口蓋',m:'摩擦音',conds:['ヒ・ヒャ・ヒュ・ヒョの子音。外来語のヒェも同じ。','ヒは「硬口蓋」。ハ(声門)・フ(両唇)と区別する。','イ段の前で、ハ行の [h] が硬口蓋に移った音。'],ex:['ひと','ひゃく','ひかり']},
+{id:'ph',type:'c',ipa:'ɸ',kana:'フ',ctx:'',v:'無声',p:'両唇',m:'摩擦音',conds:['フの子音。母音は唇を丸めない [ɯ]。','フは「両唇」の摩擦音。外来語のファ・フィ・フェ・フォも [ɸ] で整理する(唇歯の [f] で発音する人もいる)。'],ex:['ふね','ふとん','ふゆ']},
+{id:'h',type:'c',ipa:'h',kana:'ハ',ctx:'',v:'無声',p:'声門',m:'摩擦音',conds:['ハ・ヘ・ホの子音は [h]。調音点は「声門」。','ヒは [ç]、フは [ɸ] で別の音。','語中(母音の間)では有声の [ɦ] になる揺れもあるが、30音には含めない。'],ex:['はな','へや','ほし']},
+{id:'m',type:'c',ipa:'m',kana:'マ',ctx:'',v:'有声',p:'両唇',m:'鼻音',conds:['マ行(マ・ミ・ム・メ・モ)の子音。','撥音「ん」は、p・b・m の前で [m] になる(例 さんぽ、しんぶん)。'],ex:['まど','みみ','さんぽ']},
+{id:'n',type:'c',ipa:'n',kana:'ナ',ctx:'',v:'有声',p:'歯茎',m:'鼻音',conds:['ナ・ヌ・ネ・ノの子音。ニ・ニャ・ニュ・ニョは [ɲ] で別。','撥音「ん」は、t・d・n・ts・dz・ɾ などの歯茎音の前で [n] になる(例 さんだ、かんたん)。'],ex:['なつ','ぬの','さんだ']},
+{id:'ny',type:'c',ipa:'ɲ',kana:'ニ',ctx:'',v:'有声',p:'硬口蓋',m:'鼻音',conds:['ニ・ニャ・ニュ・ニョの子音。','ニは「硬口蓋」。シ・ジ・チ・ヂ(歯茎硬口蓋)と区別する。','教材によっては歯茎硬口蓋とするものもあるが、このアプリは硬口蓋で統一。'],ex:['にほん','にく','にゃんこ']},
+{id:'ng',type:'c',ipa:'ŋ',kana:'ガ',ctx:'語中(鼻濁音)',v:'有声',p:'軟口蓋',m:'鼻音',conds:['ガ行鼻濁音。語中・語尾のガ行の子音は [ŋ](例 かがみ、おかげ)。語頭は [g]。','撥音「ん」は、k・g の前で [ŋ] になる(例 あんこ、さんかく)。','現代では鼻濁音をやめて [g] で通す話者も多い。'],ex:['かがみ','おかげ','あんこ']},
+{id:'nn',type:'c',ipa:'ɴ',kana:'ン',ctx:'語末',v:'有声',p:'口蓋垂',m:'鼻音',conds:['撥音「ん」が語末や休止の前にくるとき、口蓋垂鼻音 [ɴ](代表的な表記。例 ほん、せん)。','後ろの音しだいで [m]・[n]・[ŋ] に変わる(各項を参照)。','母音・半母音・s・h などの前では、直前の母音が鼻母音になる(例 ほんを [hoõo])。'],ex:['ほん','せん','ぱん']},
+{id:'r',type:'c',ipa:'ɾ',kana:'ラ',ctx:'',v:'有声',p:'歯茎',m:'弾き音',conds:['ラ行(ラ・リ・ル・レ・ロ)の子音。舌先で歯茎を一瞬はじく。','ダ行の [d] より閉鎖がずっと短い。','語頭では [d] や側面音に近づくなど揺れが大きい。'],ex:['らくだ','りんご','くるま']},
+{id:'j',type:'c',ipa:'j',kana:'ヤ',ctx:'',v:'有声',p:'硬口蓋',m:'接近音',conds:['ヤ・ユ・ヨの子音(半母音)。拗音の「ャ・ュ・ョ」の部分にも出る。','記号 [j] は英語の y の音。「ジェイ」の音ではない。'],ex:['やま','ゆめ','よる']},
+{id:'w',type:'c',ipa:'ɰ',kana:'ワ',ctx:'',v:'有声',p:'軟口蓋',m:'接近音',conds:['ワの子音(半母音)。唇を丸めない軟口蓋の接近音 [ɰ]。','[w](両唇軟口蓋接近音)と書く教材もある。','ヲは現代の発音では [o]。'],ex:['わたし','わかい','かわ']},
+{id:'va',type:'v',ipa:'a',kana:'ア',ctx:'',tf:'中舌寄り',th:'低い(広)',lp:'丸めない',conds:['日本語の基本母音。口を広く開け、舌は低い。','前後はやや中央寄り(中舌寄り)。唇は丸めない。'],ex:['あめ','あさ']},
+{id:'vi',type:'v',ipa:'i',kana:'イ',ctx:'',tf:'前舌',th:'高い(狭)',lp:'丸めない',conds:['舌を前に出して高くする。唇は丸めない。','イ段の前では、子音が硬口蓋寄りに変わる(ヒ [ç]、ニ [ɲ] など)。'],ex:['いと','いし']},
+{id:'vu',type:'v',ipa:'ɯ',kana:'ウ',ctx:'',tf:'後舌寄り',th:'高い(狭)',lp:'丸めない',conds:['日本語のウは唇を丸めない。英語の [u] とは違う。記号は [ɯ]。','「すき」のように無声子音にはさまれると、無声化することがある。'],ex:['うみ','うた']},
+{id:'ve',type:'v',ipa:'e',kana:'エ',ctx:'',tf:'前舌',th:'半高(半狭)',lp:'丸めない',conds:['舌は前寄りで、中ぐらいの高さ。','唇は丸めない。'],ex:['えき','えん']},
+{id:'vo',type:'v',ipa:'o',kana:'オ',ctx:'',tf:'後舌',th:'半高(半狭)',lp:'丸める',conds:['日本語の基本母音で、唇を丸めるのはオだけ。','舌は後ろ寄りで、中ぐらいの高さ。'],ex:['おと','おか']}
+];
+/*DATA_END*/
+const VOICES=['有声','無声'];
+const PLACES=['両唇','歯茎','歯茎硬口蓋','硬口蓋','軟口蓋','口蓋垂','声門'];
+const MANNERS=['破裂音','摩擦音','破擦音','鼻音','弾き音','接近音'];
+const TFS=['前舌','中舌寄り','後舌寄り','後舌'];
+const THS=['高い(狭)','半高(半狭)','低い(広)'];
+const LPS=['丸めない','丸める'];
+const GROUPS={
+  c:[{key:'v',label:'声(声帯が震える?)',short:'声',sub:'',opts:VOICES,cols:'c2'},
+     {key:'p',label:'調音点(どこで)',short:'調音点',sub:'口の前 → 奥',opts:PLACES,cols:'c4'},
+     {key:'m',label:'調音法(どうやって)',short:'調音法',sub:'',opts:MANNERS,cols:'c3'}],
+  v:[{key:'tf',label:'舌の前後',short:'舌の前後',sub:'前 → 後',opts:TFS,cols:'c2'},
+     {key:'th',label:'舌の高さ',short:'舌の高さ',sub:'',opts:THS,cols:'c3'},
+     {key:'lp',label:'唇',short:'唇',sub:'',opts:LPS,cols:'c2'}]
+};
+const $=s=>document.querySelector(s);
+const KEY='onsei30.v1';
+const store={stats:{},prefs:{sym:'show',scope:'all'}};
+function load(){try{const r=localStorage.getItem(KEY);if(r){const o=JSON.parse(r);if(o&&o.stats)store.stats=o.stats;if(o&&o.prefs)Object.assign(store.prefs,o.prefs);}}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(store));}catch(e){}}
+const byId=Object.fromEntries(DATA.map(d=>[d.id,d]));
+const full=d=>d.type==='c'?d.v+d.p+d.m:`${d.tf}・${d.th}・${d.lp}`;
+const st=id=>store.stats[id]||{ok:0,ng:0,streak:0};
+const mastered=id=>st(id).streak>=2;
+const weak=id=>{const s=st(id);return (s.ok+s.ng)>0&&s.streak<2;};
+const inScope=d=>{const s=store.prefs.scope;return s==='all'||(s==='cons'&&d.type==='c')||(s==='vow'&&d.type==='v')||(s==='tricky'&&!!d.ctx)||(s==='weak'&&weak(d.id));};
+const weight=id=>{const s=st(id);if(!(s.ok+s.ng))return 2;return s.streak>=2?1:3;};
+
+let Q={deck:[],i:0,score:0,sel:{},checked:false,missed:[],done:false,symOpts:null};
+
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function buildDeck(){
+  return DATA.filter(inScope).map(d=>({d,k:-Math.log(Math.random()||1e-9)/weight(d.id)})).sort((a,b)=>a.k-b.k).map(x=>x.d);
+}
+function symbolOptions(d){
+  const pool=DATA.filter(x=>x.id!==d.id&&x.type===d.type);
+  const sim=x=>d.type==='c'?((x.p===d.p)+(x.m===d.m)+(x.v===d.v)*.5):((x.tf===d.tf)+(x.th===d.th)+(x.lp===d.lp));
+  const others=pool.map(x=>({x,s:sim(x)+Math.random()*.9})).sort((a,b)=>b.s-a.s).slice(0,3).map(o=>o.x);
+  return shuffle([d,...others]);
+}
+function startSession(list){
+  Q={deck:list||buildDeck(),i:0,score:0,sel:{},checked:false,missed:[],done:false,symOpts:null};
+  renderQuiz();
+}
+function group(key,label,sub,opts,cols,extra){
+  return `<div class="grp"><h3><span>${label}</span><small>${sub||''}</small></h3><div class="opts ${cols}">${opts.map(o=>`<button type="button" class="opt ${extra||''}" data-g="${key}" data-val="${o.val}" aria-pressed="false">${o.label}</button>`).join('')}</div></div>`;
+}
+function renderQuiz(){
+  const box=$('#quiz');
+  if(!Q.deck.length){
+    box.innerHTML=`<div class="card done"><h2>苦手な音はまだありません</h2><p class="note">まず「全30音」で何問か解くと、間違えた音がここに集まります。</p><button type="button" class="primary" id="goAll">全30音で始める</button></div>`;
+    return;
+  }
+  if(Q.done){renderDone(box);return;}
+  const d=Q.deck[Q.i];
+  const ans=store.prefs.sym==='answer';
+  if(ans&&!Q.symOpts)Q.symOpts=symbolOptions(d);
+  let h=`<div class="card prompt">
+    <div class="progress"><span>${Q.i+1} / ${Q.deck.length}</span><span>正解 ${Q.score}</span></div>
+    <div class="kana" lang="ja">${d.kana}</div>
+    ${d.ctx?`<div class="ctx">${d.ctx}</div>`:''}
+    ${ans?`<div class="ask">この音の記号と分類を選ぶ</div>`:`<div class="ipa big" aria-label="発音記号">[${d.ipa}]</div>`}
+  </div>`;
+  if(ans)h+=group('ipa','記号','',Q.symOpts.map(x=>({val:x.ipa,label:`[${x.ipa}]`})),'c4','ipa');
+  GROUPS[d.type].forEach(g=>{h+=group(g.key,g.label,g.sub,g.opts.map(o=>({val:o,label:o})),g.cols);});
+  h+=`<button type="button" class="primary" id="checkBtn" disabled>答え合わせ</button><div id="fb" class="fb" aria-live="polite"></div>`;
+  box.innerHTML=h;
+  Q.sel={};Q.checked=false;
+}
+function needKeys(d){return (store.prefs.sym==='answer'?['ipa']:[]).concat(GROUPS[d.type].map(g=>g.key));}
+function ready(){const d=Q.deck[Q.i];return needKeys(d).every(k=>Q.sel[k]);}
+function onOpt(btn){
+  if(Q.checked)return;
+  const g=btn.dataset.g,val=btn.dataset.val;
+  Q.sel[g]=val;
+  document.querySelectorAll(`#quiz .opt[data-g="${g}"]`).forEach(b=>b.setAttribute('aria-pressed',String(b===btn)));
+  $('#checkBtn').disabled=!ready();
+}
+function mark(label,mine,right,ok){
+  return `<tr><th scope="row">${label}</th><td>${ok?right:`${mine}<br><small>正解: ${right}</small>`}</td><td class="mk ${ok?'ok':'ng'}">${ok?'○':'×'}</td></tr>`;
+}
+function check(){
+  if(Q.checked||!ready())return;
+  const d=Q.deck[Q.i],s=Q.sel,ans=store.prefs.sym==='answer';
+  const gs=GROUPS[d.type];
+  const res=gs.map(g=>({g,ok:s[g.key]===d[g.key]}));
+  const symOk=ans?s.ipa===d.ipa:true;
+  const all=symOk&&res.every(r=>r.ok);
+  Q.checked=true;
+  const rec=store.stats[d.id]=st(d.id);
+  if(all){rec.ok++;rec.streak++;Q.score++;}else{rec.ng++;rec.streak=0;Q.missed.push(d.id);}
+  save();
+  document.querySelectorAll('#quiz .opt').forEach(b=>{
+    b.classList.add('locked');
+    const g=b.dataset.g,val=b.dataset.val;
+    const good=g==='ipa'?val===d.ipa:val===d[g];
+    if(good)b.classList.add('correct');
+    else if(b.getAttribute('aria-pressed')==='true')b.classList.add('wrong');
+  });
+  let t='<table><tbody>';
+  if(ans)t+=mark('記号',`[${s.ipa}]`,`[${d.ipa}]`,symOk);
+  res.forEach(r=>{t+=mark(r.g.short,s[r.g.key],d[r.g.key],r.ok);});
+  t+='</tbody></table>';
+  $('#fb').innerHTML=`<div class="card fb">
+    <div class="verdict ${all?'ok':'ng'}"><b>${all?'正解':'不正解'}</b><span class="fullname">${full(d)}</span><span class="ipa" style="font-size:26px">[${d.ipa}]</span></div>
+    ${t}
+    <div class="condbox"><h4>特殊な条件</h4><ul>${d.conds.map(c=>`<li>${c}</li>`).join('')}</ul><p class="ex">例: ${d.ex.join('、')}</p></div>
+    <button type="button" class="primary" id="nextBtn">${Q.i+1>=Q.deck.length?'結果を見る':'次へ'}</button>
+  </div>`;
+  $('#checkBtn').hidden=true;
+  const nb=$('#nextBtn');nb.focus({preventScroll:true});
+  nb.scrollIntoView({block:'nearest'});
+}
+function next(){Q.i++;Q.symOpts=null;if(Q.i>=Q.deck.length)Q.done=true;renderQuiz();window.scrollTo({top:0});}
+function renderDone(box){
+  const miss=[...new Set(Q.missed)].map(id=>byId[id]);
+  box.innerHTML=`<div class="card done">
+    <h2>おつかれさまでした</h2>
+    <div class="big-score">${Q.score} <span style="font-size:18px;color:var(--muted)">/ ${Q.deck.length}</span></div>
+    ${miss.length?`<p class="note">間違えた音(タップで条件を確認)</p><div class="miss">${miss.map(d=>`<button type="button" data-open="${d.id}"><span style="font-family:var(--f-kana);font-weight:700;font-size:18px">${d.kana}</span><span class="ipa" style="font-size:20px">[${d.ipa}]</span></button>`).join('')}</div>`:`<p class="note">全問正解です。</p>`}
+    <div class="row">
+      ${miss.length?`<button type="button" class="primary" id="redoMiss">間違えた音だけやり直す</button>`:''}
+      <button type="button" class="${miss.length?'ghost':'primary'}" id="again">もう一度</button>
+    </div></div>`;
+}
+
+function renderChart(){
+  const slot=(d,vd)=>d?`<button type="button" class="sym${vd?' vd':''}" data-open="${d.id}" aria-label="${full(d)} ${d.ipa}">${d.ipa}</button>`:`<span class="sym empty" aria-hidden="true"></span>`;
+  const C=DATA.filter(d=>d.type==='c');
+  let t='<table class="chart"><thead><tr><th scope="col"></th>'+PLACES.map(p=>`<th scope="col">${p}</th>`).join('')+'</tr></thead><tbody>';
+  MANNERS.forEach(m=>{
+    t+=`<tr><th scope="row">${m}</th>`;
+    PLACES.forEach(p=>{
+      const a=C.find(d=>d.m===m&&d.p===p&&d.v==='無声'),b=C.find(d=>d.m===m&&d.p===p&&d.v==='有声');
+      t+=`<td><div class="cell">${slot(a,false)}${slot(b,true)}</div></td>`;
+    });
+    t+='</tr>';
+  });
+  $('#chart').innerHTML=t+'</tbody></table>';
+  const V=DATA.filter(d=>d.type==='v');
+  let vt='<table class="chart vchart"><thead><tr><th scope="col"></th>'+TFS.map(x=>`<th scope="col">${x}</th>`).join('')+'</tr></thead><tbody>';
+  THS.forEach(h=>{
+    vt+=`<tr><th scope="row">${h}</th>`;
+    TFS.forEach(f=>{
+      const d=V.find(x=>x.th===h&&x.tf===f);
+      vt+=`<td><div class="cell one">${slot(d,d&&d.lp==='丸める')}</div></td>`;
+    });
+    vt+='</tr>';
+  });
+  $('#vchart').innerHTML=vt+'</tbody></table>';
+  $('#list').innerHTML=DATA.map(d=>`<details class="item" id="d-${d.id}"><summary><span class="k" lang="ja">${d.kana}${d.ctx?`<small>${d.ctx}</small>`:''}</span><span class="i">[${d.ipa}]</span><span class="n">${full(d)}</span></summary><div class="body"><div class="condbox"><h4>特殊な条件</h4><ul>${d.conds.map(c=>`<li>${c}</li>`).join('')}</ul></div><p class="ex">例: ${d.ex.join('、')}</p></div></details>`).join('');
+}
+function openDetail(id){
+  setTab('chart');
+  const el=document.getElementById('d-'+id);if(!el)return;
+  el.open=true;
+  const reduce=window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches;
+  el.scrollIntoView({block:'center',behavior:reduce?'auto':'smooth'});
+}
+
+function renderLog(){
+  const m=DATA.filter(d=>mastered(d.id)).length,w=DATA.filter(d=>weak(d.id)).length,u=DATA.length-m-w;
+  $('#sum').innerHTML=`<div><b>${m}</b><span>定着 / ${DATA.length}</span></div><div><b>${w}</b><span>要復習</span></div><div><b>${u}</b><span>未挑戦</span></div>`;
+  $('#tiles').innerHTML=DATA.map(d=>`<button type="button" class="tile${mastered(d.id)?' m':weak(d.id)?' w':''}" data-open="${d.id}" aria-label="${d.kana} ${d.ipa} ${mastered(d.id)?'定着':weak(d.id)?'要復習':'未挑戦'}"><span class="i">${d.ipa}</span><span class="k" lang="ja">${d.kana}</span></button>`).join('');
+  $('#reset').innerHTML=`<button type="button" class="danger" id="resetAsk">記録を消す</button>`;
+}
+
+function setTab(name){
+  document.querySelectorAll('.tabs button').forEach(b=>b.setAttribute('aria-selected',String(b.dataset.tab===name)));
+  ['drill','points','chart','log'].forEach(n=>{$('#tab-'+n).hidden=n!==name;});
+  if(name==='log')renderLog();
+}
+function syncCtrl(){
+  document.querySelectorAll('#ctl-sym .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.sym===store.prefs.sym)));
+  document.querySelectorAll('#ctl-scope .chip').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.scope===store.prefs.scope)));
+}
+document.addEventListener('click',e=>{
+  const t=e.target.closest('button');if(!t)return;
+  if(t.dataset.tab){setTab(t.dataset.tab);return;}
+  if(t.dataset.open){openDetail(t.dataset.open);return;}
+  if(t.dataset.sym){store.prefs.sym=t.dataset.sym;save();syncCtrl();startSession();return;}
+  if(t.dataset.scope){store.prefs.scope=t.dataset.scope;save();syncCtrl();startSession();return;}
+  if(t.classList.contains('opt')){onOpt(t);return;}
+  switch(t.id){
+    case 'checkBtn':check();break;
+    case 'nextBtn':next();break;
+    case 'again':startSession();break;
+    case 'goAll':store.prefs.scope='all';save();syncCtrl();startSession();break;
+    case 'redoMiss':startSession(shuffle([...new Set(Q.missed)].map(id=>byId[id])));break;
+    case 'resetAsk':$('#reset').innerHTML=`<p class="note">学習の記録をすべて消します。元に戻せません。</p><div class="row"><button type="button" class="danger" id="resetGo">消す</button><button type="button" class="ghost" id="resetNo">やめる</button></div>`;break;
+    case 'resetNo':renderLog();break;
+    case 'resetGo':store.stats={};save();renderLog();startSession();break;
+  }
+});
+
+load();
+if(!['all','cons','vow','tricky','weak'].includes(store.prefs.scope))store.prefs.scope='all';
+syncCtrl();renderChart();startSession();
+})();
+</script>
