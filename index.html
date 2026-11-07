@@ -1,9 +1,4 @@
 <title>一柳式　日本語音声記号学習アプリ</title>
-
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="一柳式日本語音声記号学習アプリ">
-
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Gentium+Plus:wght@400;700&family=Shippori+Mincho:wght@500;700&display=swap">
@@ -218,7 +213,7 @@ table.plain{width:100%;border-collapse:collapse;font-size:16px}
       <div class="card">
         <h2 class="sec">調音点は口の前から奥へ</h2>
         <div class="order" aria-label="調音点の順番"><span>両唇</span><i>→</i><span>歯茎</span><i>→</i><span>歯茎硬口蓋</span><i>→</i><span>硬口蓋</span><i>→</i><span>軟口蓋</span><i>→</i><span>口蓋垂</span><i>→</i><span>声門</span></div>
-        <p class="note">重点:シ・ジ・チ・ヂは「歯茎硬口蓋」、ニは「硬口蓋」。ハ=声門、ヒ=硬口蓋、フ=両唇。サの調音点は「歯茎」です。</p>
+        <p class="note">重点:シ・ジ・チ・ヂ・ニは「歯茎硬口蓋」(ニを硬口蓋とする教材もあります)。ハ=声門、ヒ=硬口蓋、フ=両唇。サの調音点は「歯茎」です。</p>
       </div>
       <div class="card">
         <h2 class="sec">母音は「舌の前後・高さ・唇」</h2>
@@ -281,7 +276,7 @@ const DATA=[
 {id:'h',type:'c',ipa:'h',kana:'ハ',ctx:'',v:'無声',p:'声門',m:'摩擦音',conds:['ハ・ヘ・ホの子音は [h]。調音点は「声門」。','ヒは [ç]、フは [ɸ] で別の音。','語中(母音の間)では有声の [ɦ] になる揺れもあるが、30音には含めない。'],ex:['はな','へや','ほし']},
 {id:'m',type:'c',ipa:'m',kana:'マ',ctx:'',v:'有声',p:'両唇',m:'鼻音',conds:['マ行(マ・ミ・ム・メ・モ)の子音。','撥音「ん」は、p・b・m の前で [m] になる(例 さんぽ、しんぶん)。'],ex:['まど','みみ','さんぽ']},
 {id:'n',type:'c',ipa:'n',kana:'ナ',ctx:'',v:'有声',p:'歯茎',m:'鼻音',conds:['ナ・ヌ・ネ・ノの子音。ニ・ニャ・ニュ・ニョは [ɲ] で別。','撥音「ん」は、t・d・n・ts・dz・ɾ などの歯茎音の前で [n] になる(例 さんだ、かんたん)。'],ex:['なつ','ぬの','さんだ']},
-{id:'ny',type:'c',ipa:'ɲ',kana:'ニ',ctx:'',v:'有声',p:'硬口蓋',m:'鼻音',conds:['ニ・ニャ・ニュ・ニョの子音。','ニは「硬口蓋」。シ・ジ・チ・ヂ(歯茎硬口蓋)と区別する。','教材によっては歯茎硬口蓋とするものもあるが、このアプリは硬口蓋で統一。'],ex:['にほん','にく','にゃんこ']},
+{id:'ny',type:'c',ipa:'ɲ',kana:'ニ',ctx:'',v:'有声',p:'歯茎硬口蓋',m:'鼻音',conds:['ニ・ニャ・ニュ・ニョの子音。','ニは「歯茎硬口蓋」。シ・ジ・チ・ヂと同じ調音点で、ナ(歯茎)と区別する。','教材によっては硬口蓋とするものもあるが、このアプリは歯茎硬口蓋で統一。'],ex:['にほん','にく','にゃんこ']},
 {id:'ng',type:'c',ipa:'ŋ',kana:'ガ',ctx:'語中(鼻濁音)',v:'有声',p:'軟口蓋',m:'鼻音',conds:['ガ行鼻濁音。語中・語尾のガ行の子音は [ŋ](例 かがみ、おかげ)。語頭は [g]。','撥音「ん」は、k・g の前で [ŋ] になる(例 あんこ、さんかく)。','現代では鼻濁音をやめて [g] で通す話者も多い。'],ex:['かがみ','おかげ','あんこ']},
 {id:'nn',type:'c',ipa:'ɴ',kana:'ン',ctx:'語末',v:'有声',p:'口蓋垂',m:'鼻音',conds:['撥音「ん」が語末や休止の前にくるとき、口蓋垂鼻音 [ɴ](代表的な表記。例 ほん、せん)。','後ろの音しだいで [m]・[n]・[ŋ] に変わる(各項を参照)。','母音・半母音・s・h などの前では、直前の母音が鼻母音になる(例 ほんを [hoõo])。'],ex:['ほん','せん','ぱん']},
 {id:'r',type:'c',ipa:'ɾ',kana:'ラ',ctx:'',v:'有声',p:'歯茎',m:'弾き音',conds:['ラ行(ラ・リ・ル・レ・ロ)の子音。舌先で歯茎を一瞬はじく。','ダ行の [d] より閉鎖がずっと短い。','語頭では [d] や側面音に近づくなど揺れが大きい。'],ex:['らくだ','りんご','くるま']},
